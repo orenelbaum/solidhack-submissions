@@ -8742,7 +8742,8 @@ const actualAsyncEntry = async () => {
 
     let errors = []
 
-    if (repoData.contributors_count > 3)
+    const contributors = await octokit.request(repoData.contributors_url)
+    if (contributors.data.length > 3)
       errors.push(`- Warning: repo has more than 3 contributors (some might have contributed to other branches. If this is the case, manual review is required).`)
 
     errors = [...errors, ...validateDates(repoData).errors]
@@ -8799,7 +8800,7 @@ const actualAsyncEntry = async () => {
     body:
 `Thank you for submitting your entry to SolidHack!
 ${errors?.length
-    ? `The following errors were found:\n${errors.join('\n')}\n\nPlease submit another commit with the fixes to this pull request.`
+    ? `The following errors were found:\n${errors.join('\n')}\n\nPlease submit another commit with the fixes to this pull request or comment "validate" to have your package automatically validated again.`
     : 'Your submission seems solid so far. We will register it after a manual review.'}
 `
   });

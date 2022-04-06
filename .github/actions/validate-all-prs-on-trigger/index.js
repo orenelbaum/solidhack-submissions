@@ -8746,7 +8746,8 @@ const validatePr = async (pr) => {
 
     let errors = []
 
-    if (repoData.contributors_count > 3)
+    const contributors = await octokit.request(repoData.contributors_url)
+    if (contributors.data.length > 3)
       errors.push(`- Warning: repo has more than 3 contributors (some might have contributed to other branches. If this is the case, manual review is required).`)
 
     errors = [...errors, ...validateDates(repoData).errors]
@@ -8787,15 +8788,11 @@ const validatePr = async (pr) => {
       return { errors }
     }
 
-    // actionsCore.setFailed(`Invalid PR formatting - a link to the repo was not added in one of the expected locations`)
     return {}
   }
 
 
   const { errors } = await asyncEntry()
-  // if (errors?.length) {
-  //   actionsCore.setFailed(errors.join('\n'))
-  // }
 
   await octokit.rest.issues.createComment({
     ...context.repo,
@@ -8803,7 +8800,7 @@ const validatePr = async (pr) => {
     body:
 `Thank you for submitting your entry to SolidHack!
 ${errors?.length
-    ? `The following errors were found:\n${errors.join('\n')}\n\nPlease submit another commit with the fixes to this pull request.`
+    ? `The following errors were found:\n${errors.join('\n')}\n\nPlease submit another commit with the fixes to this pull request or comment "validate" to have your package automatically validated again.`
     : 'Your submission seems solid so far. We will register it after a manual review.'}
 `
   });
